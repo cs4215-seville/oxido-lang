@@ -1,4 +1,5 @@
 mod parser;
+mod static_checker;
 mod compiler;
 
 use std::env;
@@ -15,6 +16,7 @@ fn main() {
 
     let source = fs::read_to_string(&args[1]).expect("Unable to read file");
     let ast = parser::parse(&source).expect("Failed to parse given program");
+    static_checker::check(&ast);
     let bytecode = compiler::compile(&ast, &HashMap::new());
     println!("{:#?}", bytecode);
 }
