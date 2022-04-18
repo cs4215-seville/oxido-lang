@@ -12,5 +12,5 @@ Once you've cloned the repository, you may execute the project by running the fo
 ```
 cargo run <DIR_TO_RUST_FILE>
 ```
-For more example programs to run, do explore the [parse examples](/parse_examples) directory.
+For more example programs to try, do explore the [parse examples](/parse_examples) directory.
 
