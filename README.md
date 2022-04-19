@@ -15,8 +15,13 @@ cargo run <DIR_TO_RUST_FILE>
 For more example programs to try, do explore the [parse examples](/parse_examples) directory.
 
 ## What release v0 contains
-Parser: parse the Rust-subset langauge input to an AST 
-        (completed, but parsing for PushStr is wrong: binary operator is parsed as a unary) 
-Static Checker: process the AST to output an error message, or a Mapping of line_no : variable_names, that specifies after which line, which variables should be dropped 
-                (incomplete. Updating of the borrow stack at the instatiation of every variable occurs, but deletion
+
+Parser: parse the Rust-subset langauge input to an AST  
+(completed, but parsing for PushStr is wrong: binary operator is parsed as a unary)  
+  
+  
+Static Checker: process the AST to output an error message, or a Mapping of line_no : variable_names, that specifies after which line, which variables should be dropped.  
+(incomplete. Updating of the borrow stack at the instatiation of every variable occurs, but deletion is not completed.)  
+  
+  
 Compiler/VM : runs the code using the AST and mappings of variable drops fed by the static checker. Shows that all allocated memory is cleared at the end of program.
