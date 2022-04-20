@@ -16,6 +16,6 @@ fn main() {
 
    let mut y_alt = &mut (*y);
    z = &mut y_alt;
-   println!("{}" , z);
+   println("{}" , z);
 
 }
