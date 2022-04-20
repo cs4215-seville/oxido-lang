@@ -15,6 +15,8 @@ cargo run <DIR_TO_RUST_FILE>
 For more example programs to try, do explore the [parse examples](/parse_examples) directory.
 
 ## Testing
+By convention, all tests can be found at the bottom of the file they're written for.
+
 At present, tests are available for the parser and the test files can be found in [parse examples](/parse_examples). Of the 60 test files, the parser is able to correctly parse 59 syntatically valid programs, and [correctly reject one](/parse_examples/statement_expr/statement_parse_error.rs). To run the tests, execute the following in the project root.
 ```
 cargo test
