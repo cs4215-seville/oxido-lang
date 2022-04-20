@@ -882,7 +882,7 @@ mod tests {
             .iter()
             .for_each(|file| {
                 let program = fs::read_to_string(file.path()).expect("Unable to read valid test program");
-                assert!(parse(&program).is_ok());
+                assert!(parse(&program).is_ok(), "Failed to parse syntatically valid program: {:#?}", file.path());
             });
 
         let invalid_programs_entries = get_files_from(test_dir, |e|
@@ -894,7 +894,7 @@ mod tests {
             .iter()
             .for_each(|file| {
                 let program = fs::read_to_string(file.path()).expect("Unable to read invalid test program");
-                assert!(parse(&program).is_err());
+                assert!(parse(&program).is_err(), "Failed to reject syntatically invalid program: {:#?}", file.path());
             });
 
     }
