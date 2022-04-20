@@ -8,9 +8,14 @@ Firstly, clone the repository to your local machine.
 ```
 git clone https://github.com/cs4215-seville/oxido-lang.git
 ```
-Once you've cloned the repository, you may execute the project by running the following command:
+Once you've cloned the repository, proceed to build the project. This will produce a compiled binary in `/target/debug/`.
 ```
-cargo run <DIR_TO_RUST_FILE>
+cargo build
+```
+To execute the compiled binary, run the following command.
+> ⚠️ As the compiler doesn't yet compile for strings, references, and their operations, we recommend that you add the `--skip-compile` flag to avoid crashing the program.
+```
+./target/debug/oxido-lang --file-dir <DIR_TO_RUST_FILE>
 ```
 For more example programs to try, do explore the [parse examples](/parse_examples) directory.
 
