@@ -11,6 +11,10 @@ pub struct Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "To be implemented")
+        match self.position {
+            Some(position) =>
+                write!(f, "Compilation error at {}:{} - {}", position.line, position.col, self.message),
+            None => write!(f, "Compilation error - {}", self.message),
+        }
     }
 }
