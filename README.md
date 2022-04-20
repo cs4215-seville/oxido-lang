@@ -17,7 +17,7 @@ For more example programs to try, do explore the [parse examples](/parse_example
 ## What release v0 contains
 
 Parser: parse the Rust-subset langauge input to an AST  
-(completed, but AST datatype incorrect defines `PushStr` as a unary operation instead of a binary one. One word fix required in [ast.rs](/src/parser/ast.rs).)  
+(completed, but one word fix required in [ast.rs](/src/compiler/ast.rs) to change `push_str` from unary operation to binary operation).  
   
   
 Static Checker: process the AST to output an error message, or a Mapping of line_no : variable_names, that specifies after which line, which variables should be dropped.  
