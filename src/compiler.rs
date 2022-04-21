@@ -405,3 +405,194 @@ impl Compile for Literal {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+    use super::{compile, Instruction};
+    use crate::parser;
+
+    fn assert_successful_compile(input_program: &str, expected: &Vec<Instruction>) {
+        let ast = parser::parse(&input_program).unwrap();
+        let got = compile(&ast, &HashMap::new()).unwrap();
+        assert!(is_same_bytecode(expected, &got));
+    }
+
+    fn is_same_bytecode(v1: &Vec<Instruction>, v2: &Vec<Instruction>) -> bool {
+        if v1.len() != v2.len() {
+            return false
+        }
+        v1.iter().zip(v2.iter()).fold(true, |acc, (i1, i2)| acc && (i1 == i2))
+    }
+
+    #[test]
+    fn compile_empty_program() {
+        let program = "";
+        let expected = vec![Instruction::START, Instruction::DONE];
+        assert_successful_compile(program, &expected);
+    }
+
+    #[test]
+    fn compile_empty_function() {
+        let program = r#"
+            fn main() {}
+        "#;
+        let expected = vec![
+            Instruction::START,
+            Instruction::LDF(0, 3, 0),
+            Instruction::ASSIGN(0),
+            Instruction::GOTOR(4),
+            Instruction::LDF(0, 2, 0),
+            Instruction::CALL(0),
+            // Instruction::LDCU,
+            Instruction::RTN,
+            Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LD(0),
+            Instruction::CALL(0),
+            Instruction::DONE,
+        ];
+        assert_successful_compile(program, &expected);
+    }
+
+    #[test]
+    fn compile_assignment() {
+        let program = r#"
+            fn main() {
+                let x = 1;
+            }
+        "#;
+        let expected = vec![
+            Instruction::START,
+            Instruction::LDF(0, 3, 0),
+            Instruction::ASSIGN(0),
+            Instruction::GOTOR(7),
+            Instruction::LDF(0, 2, 1),
+            Instruction::CALL(0),
+            Instruction::LDCI(1),
+            Instruction::ASSIGN(1),
+            Instruction::LDCU,
+            Instruction::RTN,
+            Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LD(0),
+            Instruction::CALL(0),
+            Instruction::DONE,
+        ];
+        assert_successful_compile(program, &expected);
+    }
+
+    #[test]
+    fn compile_unary_operation() {
+        let program = r#"
+        fn main() {
+            !true;
+        }
+        "#;
+        let expected = vec![
+            Instruction::START,
+            Instruction::LDF(0, 3, 0),
+            Instruction::ASSIGN(0),
+            Instruction::GOTOR(8),
+            Instruction::LDF(0, 2, 0),
+            Instruction::CALL(0),
+            Instruction::LDCB(true),
+            Instruction::NOT,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
+            Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LD(0),
+            Instruction::CALL(0),
+            Instruction::DONE,
+        ];
+        assert_successful_compile(program, &expected);
+    }
+
+    #[test]
+    fn compile_binary_operation() {
+        let program = r#"
+        fn main() {
+            1 + 2;
+        }
+        "#;
+        let expected = vec![
+            Instruction::START,
+            Instruction::LDF(0, 3, 0),
+            Instruction::ASSIGN(0),
+            Instruction::GOTOR(9),
+            Instruction::LDF(0, 2, 0),
+            Instruction::CALL(0),
+            Instruction::LDCI(1),
+            Instruction::LDCI(2),
+            Instruction::PLUS,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
+            Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LD(0),
+            Instruction::CALL(0),
+            Instruction::DONE,
+        ];
+        assert_successful_compile(program, &expected);
+    }
+
+    #[test]
+    fn compile_function_application() {
+        let program = r#"
+        fn main() {
+            add(1, 2);
+        }
+
+        fn add(x: i64, y: i64) -> i64 {
+            x + y
+        }
+        "#;
+        let expected = vec![
+
+            Instruction::LDF(0, 2, 0),
+            Instruction::CALL(0),
+            Instruction::RTN,
+            Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LD(0),
+            Instruction::CALL(0),
+            Instruction::DONE,
+        ];
+
+        let expected = vec![
+            Instruction::START,
+            Instruction::LDF(0, 3, 0),
+            Instruction::ASSIGN(0),
+            Instruction::GOTOR(10),
+            Instruction::LDF(0, 2 ,0),
+            Instruction::CALL(0),
+            Instruction::LD(1),
+            Instruction::LDCI(1),
+            Instruction::LDCI(2),
+            Instruction::CALL(2),
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
+            Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LDF(0, 3, 2),
+            Instruction::ASSIGN(1),
+            Instruction::GOTOR(7),
+            Instruction::LDF(0, 2, 0),
+            Instruction::CALL(0),
+            Instruction::LD(2),
+            Instruction::LD(3),
+            Instruction::PLUS,
+            Instruction::RTN,
+            Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LD(0),
+            Instruction::CALL(0),
+            Instruction::DONE,
+        ];
+        assert_successful_compile(program, &expected);
+    }
+}
