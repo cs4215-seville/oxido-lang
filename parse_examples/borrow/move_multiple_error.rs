@@ -1,5 +1,5 @@
 fn main() {
-    let s = string_from("hello");
+    let s = StringFrom("hello");
 
     let r1 = s;
     let r2 = s;
@@ -9,7 +9,7 @@ fn main() {
 /*error[E0382]: use of moved value: `s`
  --> move_multiple_error.rs:5:14
   |
-2 |     let s = string_from("hello");
+2 |     let s = StringFrom("hello");
   |         - move occurs because `s` has type `String`, which does not implement the `Copy` trait
 3 |
 4 |     let r1 = s;

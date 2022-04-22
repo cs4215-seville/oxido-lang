@@ -5,11 +5,11 @@ fn main() {
         x
     }
 
-    let string1 = string_from("first");
+    let string1 = StringFrom("first");
 
     {
-        let string2 = string_from("second");
-        let result = first(as_str(string1), as_str(string2));
+        let string2 = StringFrom("second");
+        let result = first(AsStr(string1), AsStr(string2));
         println("The first string is {}", result);
     }
 }

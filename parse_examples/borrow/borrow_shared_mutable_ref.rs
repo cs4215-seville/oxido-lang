@@ -1,5 +1,5 @@
 fn main() {
-    let mut s = string_from("hello");
+    let mut s = StringFrom("hello");
     let r1 = &mut s;
     println("mutable r1 {}", r1); // r4 : & String
 
@@ -16,6 +16,6 @@ fn main() {
 }
 
 fn push_to_str(input: &mut String) -> &mut String {
-    push_str(input, ", world");
+    PushStr(input, ", world");
     input
 }

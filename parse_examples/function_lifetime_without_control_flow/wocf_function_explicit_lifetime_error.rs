@@ -5,11 +5,11 @@ fn main() {
         x
     }
     
-    let string1 = string_from("correct");
+    let string1 = StringFrom("correct");
     let result;
     {
-        let string2 = string_from("wrong");
-        result = first(as_str(string1), as_str(string2));
+        let string2 = StringFrom("wrong");
+        result = first(AsStr(string1), AsStr(string2));
     }
     println("The first string is {}", result);
 }
@@ -18,7 +18,7 @@ fn main() {
 error[E0597]: `string2` does not live long enough
   --> wocf_function_explicit_lifetime_error.rs:12:42
    |
-12 |         result = first(string1.as_str(), string2.as_str());
+12 |         result = first(string1.AsStr(), string2.AsStr());
    |                                          ^^^^^^^^^^^^^^^^ borrowed value does not live long enough
 13 |     }
    |     - `string2` dropped here while still borrowed

@@ -13,7 +13,7 @@ fn main() {
     // different types
     let spaces = "   ";
     println("There are spaces {} here.", spaces);
-    let spaces = len(spaces);
+    let spaces = Len(spaces);
     println("The space is of length {}.", spaces);
 }
 //12

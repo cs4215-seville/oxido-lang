@@ -1,9 +1,9 @@
 fn main() {
-    let s = string_from("hello");
+    let s = StringFrom("hello");
 
     change(&s);
 }
 
 fn change(some_string: &mut String) {
-    push_str(some_string, ", world");
+    PushStr(some_string, ", world");
 }

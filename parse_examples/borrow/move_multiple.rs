@@ -1,5 +1,5 @@
 fn main() {
-    let s = string_from("hello");
+    let s = StringFrom("hello");
 
     let r1 = s;
     let r2 = r1;

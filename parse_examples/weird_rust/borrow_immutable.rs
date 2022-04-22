@@ -1,11 +1,11 @@
 fn main() {
-    let mut x = string_from("hello");
+    let mut x = StringFrom("hello");
     let y = &x;
     let z = &x;
     println("y: {}", y);
     println("z: {}", z);
 
-    push_str(x, ", world");
+    PushStr(x, ", world");
     println("x: {}", x);
 
 }

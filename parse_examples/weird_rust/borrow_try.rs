@@ -20,5 +20,5 @@ fn change_pts(input_ptr : &mut i64) {
 }
 
 fn mine(input_str : String) -> i64 {
-    len(input_str)
+    Len(input_str)
 }

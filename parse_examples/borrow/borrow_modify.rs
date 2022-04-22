@@ -1,5 +1,5 @@
 fn main() {
-    let mut s = string_from("hello");
+    let mut s = StringFrom("hello");
 
     change(&mut s);
     change(&mut s);
@@ -7,5 +7,5 @@ fn main() {
 }
 
 fn change(some_string: &mut String) {
-    push_str(some_string, ", world");
+    PushStr(some_string, ", world");
 }

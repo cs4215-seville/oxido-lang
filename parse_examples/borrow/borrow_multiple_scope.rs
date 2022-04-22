@@ -1,5 +1,5 @@
 fn main() {
-    let mut s = string_from("hello");
+    let mut s = StringFrom("hello");
 
     {
         let r1 = &mut s;
