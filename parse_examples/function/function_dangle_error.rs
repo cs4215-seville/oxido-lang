@@ -3,6 +3,6 @@ fn main() {
 }
 
 fn dangle() -> &String {
-    let s = StringFrom("hello");
+    let s = string_from("hello");
     &s
 }
