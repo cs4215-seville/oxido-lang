@@ -58,3 +58,22 @@ pub fn extend(heap: &mut Heap, env_node: usize, extension_count: usize) -> HeapO
 
     Ok(extended_env_node)
 }
+
+pub fn get_at_index(heap: &Heap, env_node: usize, index: usize) -> HeapOperationResult<isize> {
+    let first_child_addr = heap.deref(env_node, FIRST_CHILD_LABEL.into())?;
+    if first_child_addr.is_none() {
+        return Err(Error {
+            message: format!("Unable to get from environment by index, the given environment has no first child"),
+        })
+    }
+    let first_child_addr: usize = first_child_addr.unwrap().try_into().unwrap();
+
+    let child_at_index = heap.deref(env_node, first_child_addr + index)?;
+    if child_at_index.is_none() {
+        return Err(Error {
+            message: format!("Unable to get from environment by index, the given environment has no child with the given index"),
+        })
+    }
+
+    Ok(child_at_index.unwrap())
+}

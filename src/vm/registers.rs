@@ -1,4 +1,4 @@
-pub type Register = usize;
+pub type Register = isize;
 
 pub struct Registers {
     pub program_counter: Register,

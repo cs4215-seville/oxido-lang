@@ -12,7 +12,7 @@ pub struct Heap {
 impl Heap {
     pub fn new(size: usize) -> Heap {
         Heap {
-            memory: vec![],
+            memory: vec![0; size],
             size,
             free_at: 0,
         }

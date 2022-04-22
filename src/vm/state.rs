@@ -7,6 +7,7 @@ pub enum ExitState {
     Normal,
     DivisionError,
     OutOfMemoryError,
+    HeapError(String),
 }
 
 pub struct VirtualMachineState {
