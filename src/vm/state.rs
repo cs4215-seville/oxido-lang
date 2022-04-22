@@ -13,7 +13,7 @@ pub struct VirtualMachineState {
     pub registers: Registers,
     pub runtime_stack: Vec<usize>,
     pub is_running: bool,
-    pub exit_state: Option<ExitState>,
+    pub exit_state: ExitState,
     pub heap: Heap,
 }
 
@@ -22,8 +22,8 @@ impl VirtualMachineState {
         VirtualMachineState {
             registers: Registers::new(),
             runtime_stack: vec![],
-            is_running: false,
-            exit_state: None,
+            is_running: true,
+            exit_state: ExitState::Normal,
             heap,
         }
     }

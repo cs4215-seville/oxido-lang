@@ -22,8 +22,7 @@ pub fn execute(bytecode: &Vec<Instruction>, heap_size: usize) -> ExecutionResult
         };
     }
 
-    // Consider making exit_state a non-option type.
-    match state.exit_state.unwrap() {
+    match state.exit_state {
         ExitState::Normal => unimplemented!(),
         ExitState::DivisionError => Err(Error {
             message: String::from("Execution aborted"),
