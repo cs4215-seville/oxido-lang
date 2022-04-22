@@ -50,7 +50,7 @@ cargo test
 ## What release v0 contains
 
 Parser: parse the Rust-subset langauge input to an AST  
-(completed, but one word fix required in [ast.rs](/src/parser/ast.rs) to change `push_str` from unary operation to binary operation).  
+(completed, but one word fix required in [ast.rs](/src/parser/ast.rs) to change `PushStr` from unary operation to binary operation).  
   
   
 Static Checker: process the AST to output an error message, or a Mapping of line_no : variable_names, that specifies after which line, which variables should be dropped.  
