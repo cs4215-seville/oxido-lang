@@ -19,7 +19,7 @@ use ast::{
     SequenceStmt,
     VariadicOperator,
     PrimitiveOperator,
-    NullaryOperator,
+    // NullaryOperator,
 };
 
 #[derive(Parser)]
@@ -794,8 +794,8 @@ impl OxidoParser {
                         Some(PrimitiveOperator::Unary(UnaryOperator::AsStr)),
                     "push_str" =>
                         Some(PrimitiveOperator::Unary(UnaryOperator::PushStr)),
-                    "main" =>
-                        Some(PrimitiveOperator::Nullary(NullaryOperator::Main)),
+                    // "main" =>
+                    //     Some(PrimitiveOperator::Nullary(NullaryOperator::Main)),
                     "println" =>
                         Some(PrimitiveOperator::VariadicOperator(VariadicOperator::Println)),
                     _ => None,
