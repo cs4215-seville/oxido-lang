@@ -173,7 +173,24 @@ impl OxidoParser {
                     stmts
                 }
             },
-            None => stmts,
+            None => {
+                // Temporary patch since source location isn't used.
+                let position = SourceLocation {
+                    line: 0,
+                    col: 0,
+                };
+                let return_expr = Expr::ReturnExpr(
+                    Box::from(Expr::LiteralExpr(
+                        Literal::UnitLiteral,
+                        position,
+                    )),
+                    position,
+                );
+                stmts.push(SequenceStmt::Stmt(
+                    Stmt::ExprStmt(return_expr),
+                ));
+                stmts
+            },
         };
 
         let (line, col) = input.as_span().start_pos().line_col();

@@ -196,9 +196,10 @@ impl Compile for Stmt {
                 let mut bytecode = vec![
                     Instruction::LDF(0, 3, num_of_params),
                     Instruction::ASSIGN(func_index),
-                    Instruction::GOTOR(body_bytecode.len() + 1),
+                    Instruction::GOTOR(body_bytecode.len() + 2),
                 ];
                 bytecode.extend(body_bytecode);
+                bytecode.push(Instruction::RTN);
                 bytecode.extend(self.compile_drops(position, drop_at)?);
                 bytecode.push(Instruction::LDCU);
 
@@ -327,14 +328,6 @@ impl Compile for Block {
         ];
         bytecode.extend(block_bytecode);
 
-        match bytecode.last() {
-            Some(instr) => match instr {
-                Instruction::RTN => (),
-                _ => bytecode.push(Instruction::RTN),
-            },
-            None => bytecode.extend(vec![Instruction::LDCU, Instruction::RTN]),
-        };
-
         Ok(bytecode)
     }
 }
@@ -441,10 +434,11 @@ mod tests {
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(4),
+            Instruction::GOTOR(6),
             Instruction::LDF(0, 2, 0),
             Instruction::CALL(0),
-            // Instruction::LDCU,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
@@ -466,12 +460,15 @@ mod tests {
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(7),
+            Instruction::GOTOR(10),
             Instruction::LDF(0, 2, 1),
             Instruction::CALL(0),
             Instruction::LDCI(1),
             Instruction::ASSIGN(1),
             Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
@@ -493,13 +490,16 @@ mod tests {
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(8),
+            Instruction::GOTOR(11),
             Instruction::LDF(0, 2, 0),
             Instruction::CALL(0),
             Instruction::LDCB(true),
             Instruction::NOT,
             Instruction::POP,
             Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
@@ -521,7 +521,7 @@ mod tests {
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(9),
+            Instruction::GOTOR(12),
             Instruction::LDF(0, 2, 0),
             Instruction::CALL(0),
             Instruction::LDCI(1),
@@ -529,6 +529,9 @@ mod tests {
             Instruction::PLUS,
             Instruction::POP,
             Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
@@ -550,23 +553,12 @@ mod tests {
             x + y
         }
         "#;
-        let expected = vec![
-
-            Instruction::LDF(0, 2, 0),
-            Instruction::CALL(0),
-            Instruction::RTN,
-            Instruction::LDCU,
-            Instruction::POP,
-            Instruction::LD(0),
-            Instruction::CALL(0),
-            Instruction::DONE,
-        ];
 
         let expected = vec![
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(10),
+            Instruction::GOTOR(13),
             Instruction::LDF(0, 2 ,0),
             Instruction::CALL(0),
             Instruction::LD(1),
@@ -575,17 +567,21 @@ mod tests {
             Instruction::CALL(2),
             Instruction::POP,
             Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
             Instruction::LDF(0, 3, 2),
             Instruction::ASSIGN(1),
-            Instruction::GOTOR(7),
+            Instruction::GOTOR(8),
             Instruction::LDF(0, 2, 0),
             Instruction::CALL(0),
             Instruction::LD(2),
             Instruction::LD(3),
             Instruction::PLUS,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
