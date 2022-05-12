@@ -32,12 +32,11 @@ Once you've cloned the repository, proceed to build the project. This will produ
 ```
 cargo build
 ```
-To execute the compiled binary, run the command below and supply a path to your program. Your program would then be parsed, type-checked, and compiled. The compiled bytecode would then be printed out.
+To execute the compiled binary, run the command below and supply the path to your program. Your program would then be parsed, type-checked, compiled, and executed. As the virtual machine is currently not fully functional, execution would fail.
 > ⚠️ As the compiler doesn't yet compile for strings, references, and their operations, we recommend that you add the `--skip-compile` flag to avoid crashing the program if you're using any of those features.
 ```
-./target/debug/oxido-lang --file-dir <DIR_TO_RUST_FILE>
+./target/debug/oxido-lang --file-dir <DIR_TO_RUST_FILE> --heap-size=250
 ```
-For more example programs to try, do explore the [parse examples](/parse_examples) directory.
 
 ## Testing
 By convention, all tests can be found at the bottom of the file they're written for.

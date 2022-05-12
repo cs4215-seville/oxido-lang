@@ -99,16 +99,16 @@ pub enum PrimitiveOperation {
 
 #[derive(Debug, Copy, Clone)]
 pub enum PrimitiveOperator {
-    Nullary(NullaryOperator),
+    // Nullary(NullaryOperator),
     Unary(UnaryOperator),
     Binary(BinaryOperator),
     VariadicOperator(VariadicOperator),
 }
 
-#[derive(Debug, Copy, Clone)]
-pub enum NullaryOperator {
-    Main,
-}
+// #[derive(Debug, Copy, Clone)]
+// pub enum NullaryOperator {
+//     Main,
+// }
 
 #[derive(Debug, Copy, Clone)]
 pub enum UnaryOperator {
