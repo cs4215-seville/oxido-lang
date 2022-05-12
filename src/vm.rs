@@ -31,8 +31,6 @@ pub fn execute(bytecode: &Vec<Instruction>, heap_size: usize) -> ExecutionResult
         bytecode[pc].execute(&mut state);
     }
 
-    state.heap.print_heap();
-
     match state.exit_state {
         ExitState::Normal => Ok(String::from("Execution complete")),
         ExitState::DivisionError => Err(Error {

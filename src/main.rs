@@ -40,7 +40,13 @@ fn main() {
         static_checker::check(&ast);
     }
     if !args.skip_compile {
-        let bytecode = compiler::compile(&ast, &HashMap::new()).expect("Failed to compile given program");
-        println!("{:#?}", vm::execute(&bytecode, args.heap_size));
+        println!("Compiling...\n");
+        let bytecode = compiler::compile(&ast, &HashMap::new())
+            .expect("Failed to compile given program");
+
+        if !args.skip_execute {
+            println!("Executing...\n");
+            println!("{:#?}", vm::execute(&bytecode, args.heap_size));
+        }
     }
 }
