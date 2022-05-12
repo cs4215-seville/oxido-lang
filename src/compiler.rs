@@ -11,6 +11,7 @@ use crate::parser::ast::{
     UnaryOperator,
     BinaryOperator,
     VariadicOperator,
+    PrimitiveOperator,
     Stmt,
     SequenceStmt,
     SourceLocation
@@ -196,9 +197,10 @@ impl Compile for Stmt {
                 let mut bytecode = vec![
                     Instruction::LDF(0, 3, num_of_params),
                     Instruction::ASSIGN(func_index),
-                    Instruction::GOTOR(body_bytecode.len() + 1),
+                    Instruction::GOTOR(body_bytecode.len() + 2),
                 ];
                 bytecode.extend(body_bytecode);
+                bytecode.push(Instruction::RTN);
                 bytecode.extend(self.compile_drops(position, drop_at)?);
                 bytecode.push(Instruction::LDCU);
 
@@ -253,9 +255,30 @@ impl Compile for Expr {
 
                 Ok(bytecode)
             },
-            Expr::ApplicationExpr { callee, arguments, position, .. } => {
+            Expr::ApplicationExpr { callee, arguments, position, is_primitive } => {
                 // Closures (also known as anonymous functions in Rust) are presently not supported.
                 // For now, all callees would be identifiers (named).
+                if is_primitive.is_some() {
+                    return match is_primitive.unwrap() {
+                        PrimitiveOperator::Unary(op) => match op {
+                            UnaryOperator::ImmutableBorrow => make_unsupported_error("&"),
+                            UnaryOperator::MutableBorrow => make_unsupported_error("&mut"),
+                            UnaryOperator::Dereference => make_unsupported_error("*"),
+                            UnaryOperator::StringFrom => make_unsupported_error("string_from"),
+                            UnaryOperator::Drop => make_unsupported_error("drop"),
+                            UnaryOperator::Len => make_unsupported_error("len"),
+                            UnaryOperator::AsStr => make_unsupported_error("as_str"),
+                            UnaryOperator::PushStr => make_unsupported_error("push_str"),
+                            _ => panic!("Unknown primitive function being used as application"),
+                        },
+                        PrimitiveOperator::Binary(op) => panic!("Unknown primitive function being used as application"),
+                        PrimitiveOperator::VariadicOperator(op) => match op {
+                            VariadicOperator::Println => make_unsupported_error("println"),
+                        },
+                    }
+                }
+
+
                 let func_name = get_identifier_name(&callee)?;
                 let func_index = index_of(index_table, &func_name, Some(*position))?;
 
@@ -327,14 +350,6 @@ impl Compile for Block {
         ];
         bytecode.extend(block_bytecode);
 
-        match bytecode.last() {
-            Some(instr) => match instr {
-                Instruction::RTN => (),
-                _ => bytecode.push(Instruction::RTN),
-            },
-            None => bytecode.extend(vec![Instruction::LDCU, Instruction::RTN]),
-        };
-
         Ok(bytecode)
     }
 }
@@ -344,19 +359,19 @@ impl Compile for PrimitiveOperation {
         match self {
             PrimitiveOperation::UnaryOperation { operator, operand } => {
                 let instruction = match operator {
-                    UnaryOperator::Not => Instruction::NOT,
-                    UnaryOperator::UnaryMinus => Instruction::UMINUS,
-                    UnaryOperator::ImmutableBorrow => unimplemented!(),
-                    UnaryOperator::MutableBorrow => unimplemented!(),
-                    UnaryOperator::Dereference => unimplemented!(),
-                    UnaryOperator::StringFrom => unimplemented!(),
-                    UnaryOperator::Drop => unimplemented!(),
-                    UnaryOperator::Len => unimplemented!(),
-                    UnaryOperator::AsStr => unimplemented!(),
-                    UnaryOperator::PushStr => unimplemented!(),
+                    UnaryOperator::Not => Ok(Instruction::NOT),
+                    UnaryOperator::UnaryMinus => Ok(Instruction::UMINUS),
+                    UnaryOperator::ImmutableBorrow => make_unsupported_error("&"),
+                    UnaryOperator::MutableBorrow => make_unsupported_error("&mut"),
+                    UnaryOperator::Dereference => make_unsupported_error("*"),
+                    UnaryOperator::StringFrom => make_unsupported_error("string_from"),
+                    UnaryOperator::Drop => make_unsupported_error("drop"),
+                    UnaryOperator::Len => make_unsupported_error("len"),
+                    UnaryOperator::AsStr => make_unsupported_error("as_str"),
+                    UnaryOperator::PushStr => make_unsupported_error("push_str"),
                 };
                 let mut bytecode = operand.compile(drop_at, index_table)?;
-                bytecode.push(instruction);
+                bytecode.push(instruction?);
                 Ok(bytecode)
             },
             PrimitiveOperation::BinaryOperation { operator, first_operand, second_operand } => {
@@ -381,13 +396,13 @@ impl Compile for PrimitiveOperation {
             }
             PrimitiveOperation::VariadicOperation { operator, operands } => {
                 let instruction = match operator {
-                    VariadicOperator::Println => unimplemented!(),
+                    VariadicOperator::Println => make_unsupported_error("println"),
                 };
-                let bytecode = operands
+                let mut bytecode = operands
                     .iter()
                     .map(|expr| expr.compile(drop_at, index_table))
                     .fold(Ok(vec![]), accumulate_bytecode)?;
-                bytecode.push(instruction);
+                bytecode.push(instruction?);
                 Ok(bytecode)
             }
         }
@@ -399,11 +414,18 @@ impl Compile for Literal {
         match self {
             Literal::IntLiteral(value) => Ok(vec![Instruction::LDCI(*value)]),
             Literal::BoolLiteral(value) => Ok(vec![Instruction::LDCB(*value)]),
-            // Literal::StringLiteral(value) => vec![Instruction::LDCS(*value)],
+            Literal::StringLiteral(value) => make_unsupported_error::<Vec<Instruction>>("String Literals"),
             Literal::UnitLiteral => Ok(vec![Instruction::LDCU]),
-            _ => unimplemented!()
         }
     }
+}
+
+fn make_unsupported_error<T>(name: &str) -> Result<T> {
+    Err(Error {
+        message: format!(
+            "Compilation of \"{}\" is currently incomplete and unsupported. Please refer to https://github.com/cs4215-seville/oxido-lang#project-status for more information on what is currently supported.", name),
+        position: None,
+    })
 }
 
 #[cfg(test)]
@@ -441,10 +463,11 @@ mod tests {
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(4),
+            Instruction::GOTOR(6),
             Instruction::LDF(0, 2, 0),
             Instruction::CALL(0),
-            // Instruction::LDCU,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
@@ -466,12 +489,15 @@ mod tests {
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(7),
+            Instruction::GOTOR(10),
             Instruction::LDF(0, 2, 1),
             Instruction::CALL(0),
             Instruction::LDCI(1),
             Instruction::ASSIGN(1),
             Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
@@ -493,13 +519,16 @@ mod tests {
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(8),
+            Instruction::GOTOR(11),
             Instruction::LDF(0, 2, 0),
             Instruction::CALL(0),
             Instruction::LDCB(true),
             Instruction::NOT,
             Instruction::POP,
             Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
@@ -521,7 +550,7 @@ mod tests {
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(9),
+            Instruction::GOTOR(12),
             Instruction::LDF(0, 2, 0),
             Instruction::CALL(0),
             Instruction::LDCI(1),
@@ -529,6 +558,9 @@ mod tests {
             Instruction::PLUS,
             Instruction::POP,
             Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
@@ -550,23 +582,12 @@ mod tests {
             x + y
         }
         "#;
-        let expected = vec![
-
-            Instruction::LDF(0, 2, 0),
-            Instruction::CALL(0),
-            Instruction::RTN,
-            Instruction::LDCU,
-            Instruction::POP,
-            Instruction::LD(0),
-            Instruction::CALL(0),
-            Instruction::DONE,
-        ];
 
         let expected = vec![
             Instruction::START,
             Instruction::LDF(0, 3, 0),
             Instruction::ASSIGN(0),
-            Instruction::GOTOR(10),
+            Instruction::GOTOR(13),
             Instruction::LDF(0, 2 ,0),
             Instruction::CALL(0),
             Instruction::LD(1),
@@ -575,17 +596,21 @@ mod tests {
             Instruction::CALL(2),
             Instruction::POP,
             Instruction::LDCU,
+            Instruction::POP,
+            Instruction::LDCU,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
             Instruction::LDF(0, 3, 2),
             Instruction::ASSIGN(1),
-            Instruction::GOTOR(7),
+            Instruction::GOTOR(8),
             Instruction::LDF(0, 2, 0),
             Instruction::CALL(0),
             Instruction::LD(2),
             Instruction::LD(3),
             Instruction::PLUS,
+            Instruction::RTN,
             Instruction::RTN,
             Instruction::LDCU,
             Instruction::POP,
