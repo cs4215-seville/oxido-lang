@@ -1,6 +1,7 @@
 mod parser;
 mod static_checker;
 mod compiler;
+mod vm;
 
 use std::fs;
 use std::process;
@@ -11,6 +12,9 @@ use clap::Parser;
 struct Cli {
     #[clap(short, long)]
     file_dir: String,
+
+    #[clap(long)]
+    heap_size: usize,
 
     #[clap(long)]
     skip_typecheck: bool,
@@ -36,11 +40,7 @@ fn main() {
         static_checker::check(&ast);
     }
     if !args.skip_compile {
-        println!("Compiling...\n");
-        let bytecode = compiler::compile(&ast, &HashMap::new());
-        match bytecode {
-            Ok(result) => println!("{:#?}", result),
-            Err(err) => println!("{}", err),
-        }
+        let bytecode = compiler::compile(&ast, &HashMap::new()).expect("Failed to compile given program");
+        println!("{:#?}", vm::execute(&bytecode, args.heap_size));
     }
 }
